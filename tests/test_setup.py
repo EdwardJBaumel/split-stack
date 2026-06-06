@@ -55,6 +55,20 @@ def test_run_setup_dry_run_no_pull(_mock_discover, tmp_path):
     assert not config.is_file()
 
 
+@patch("local_llm_router.setup_wizard.discover_models", return_value=[])
+def test_run_setup_dry_run_16gb_includes_complex_alt(_mock_discover, tmp_path):
+    config = tmp_path / "local-llm-router.models.json"
+    result = run_setup(
+        "workstation_16gb",
+        config_path=config,
+        dry_run=True,
+        interactive=False,
+    )
+    assert result.ready
+    assert result.tiers["complex"] == "qwen3.6:35b-a3b"
+    assert result.tiers["complex_alt"] == "qwen3:14b"
+
+
 def test_write_setup_config_sets_profile(tmp_path):
     path = tmp_path / "local-llm-router.models.json"
     write_setup_config("workstation_24gb", path)
